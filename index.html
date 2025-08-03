@@ -1,139 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simple Link Cleaner</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #fff;
-      color: #222;
-    }
-
-    h1 {
-      font-size: 1.4em;
-      margin-bottom: 10px;
-    }
-
-    input, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 1em;
-      box-sizing: border-box;
-    }
-
-    textarea {
-      resize: none;
-      height: 80px;
-    }
-
-    button {
-      background-color: #333;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #111;
-    }
-
-    .note {
-      font-size: 0.8em;
-      color: #666;
-    }
-
-    .error {
-      color: red;
-      font-size: 0.9em;
-    }
-
-    @media (max-width: 640px) {
-      body {
-        margin: 20px 10px;
-        padding: 10px;
-      }
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link Cleaner</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>🧼 Link Cleaner</h1>
-  <p>Paste a URL to remove tracking parameters like <code>utm_source</code>, <code>si</code>, or <code>fbclid</code>.</p>
+  <h1><span class="emoji">🧼</span> Link Cleaner</h1>
+  <p>Paste a URL to remove tracking parameters like <code>utm_source</code>, <code>si</code>, or <code>fbclid</code>.</p>
 
-  <input type="text" id="urlInput" placeholder="Paste URL here" />
+  <input type="text" id="urlInput" placeholder="Paste URL here" />
 
-  <button onclick="cleanLink()">Clean Link</button>
+  <button onclick="cleanLink()">Clean Link</button>
 
-  <textarea id="output" readonly placeholder="Clean link will appear here..."></textarea>
-  <button onclick="copyResult()">Copy to Clipboard</button>
+  <textarea id="output" readonly placeholder="Clean link will appear here..."></textarea>
+  <button onclick="copyResult()">Copy to Clipboard</button>
 
-  <p class="error" id="errorBox" style="display: none;"></p>
+  <p class="error" id="errorBox" style="display: none;"></p>
 
-  <p class="note">
-    ✅ Works best with links from:
-    <ul class="note">
-      <li>YouTube (preserves <code>v</code>, <code>t</code>, <code>list</code>)</li>
-      <li>News articles (e.g., CNN, NYTimes, etc.)</li>
-      <li>Online stores (Amazon, etc. to remove affiliate tags)</li>
-    </ul>
-    ❌ Doesn't support shortened URLs like <code>bit.ly</code> unless expanded.<br />
-    All processing is local—nothing is sent anywhere.
-  </p>
+  <div class="note">
+    ✅ Works best with links from:
+    <ul>
+      <li>YouTube (preserves <code>v</code>, <code>t</code>, <code>list</code>)</li>
+      <li>News articles (e.g., CNN, NYTimes, etc.)</li>
+      <li>Online stores (Amazon, etc. to remove affiliate tags)</li>
+    </ul>
+    ❌ Doesn't support shortened URLs like <code>bit.ly</code> unless expanded.<br />
+    <em>All processing is local—nothing is sent anywhere.</em>
+  </div>
 
-  <script>
-    function cleanLink() {
-      const input = document.getElementById("urlInput").value.trim();
-      const outputBox = document.getElementById("output");
-      const errorBox = document.getElementById("errorBox");
-      errorBox.style.display = 'none';
+  <script>
+    function cleanLink() {
+      const input = document.getElementById("urlInput").value.trim();
+      const outputBox = document.getElementById("output");
+      const errorBox = document.getElementById("errorBox");
+      errorBox.style.display = 'none';
 
-      if (!input.startsWith("http")) {
-        errorBox.textContent = "Please enter a full URL starting with http or https.";
-        errorBox.style.display = 'block';
-        outputBox.value = "";
-        return;
-      }
+      if (!input.startsWith("http")) {
+        errorBox.textContent = "⚠️ That link is missing http:// or https:// — please paste the full URL.";
+        errorBox.style.display = 'block';
+        outputBox.value = "";
+        return;
+      }
 
-      try {
-        const url = new URL(input);
+      try {
+        const url = new URL(input);
 
-        // Allowed query parameters by hostname
-        const host = url.hostname;
-        let keepParams = [];
+        const host = url.hostname;
+        let keepParams = [];
 
-        if (host.includes("youtube.com") || host.includes("youtu.be")) {
-          keepParams = ['v', 't', 'list'];
-        } else if (host.includes("twitter.com") || host.includes("x.com")) {
-          keepParams = []; // clean everything
-        } else {
-          keepParams = []; // default behavior: wipe all
-        }
+        if (host.includes("youtube.com") || host.includes("youtu.be")) {
+          keepParams = ['v', 't', 'list'];
+        }
 
-        [...url.searchParams.keys()].forEach(param => {
-          if (!keepParams.includes(param)) {
-            url.searchParams.delete(param);
-          }
-        });
+        if (host.includes("bit.ly") || host.includes("tinyurl")) {
+          errorBox.textContent = "⚠️ Shortened URLs like bit.ly must be expanded first.";
+          errorBox.style.display = 'block';
+          outputBox.value = "";
+          return;
+        }
 
-        outputBox.value = url.toString();
-      } catch (err) {
-        outputBox.value = "";
-        errorBox.textContent = "Invalid URL. Please try again.";
-        errorBox.style.display = 'block';
-      }
-    }
+        [...url.searchParams.keys()].forEach(param => {
+          if (!keepParams.includes(param)) {
+            url.searchParams.delete(param);
+          }
+        });
 
-    function copyResult() {
-      const output = document.getElementById("output");
-      output.select();
-      document.execCommand("copy");
-      alert("Link copied to clipboard.");
-    }
-  </script>
+        outputBox.value = url.toString();
+      } catch (err) {
+        outputBox.value = "";
+        errorBox.textContent = "Invalid URL. Please try again.";
+        errorBox.style.display = 'block';
+      }
+    }
+
+    function copyResult() {
+      const output = document.getElementById("output");
+      output.select();
+      document.execCommand("copy");
+      alert("Link copied to clipboard.");
+    }
+  </script>
 </body>
 </html>
