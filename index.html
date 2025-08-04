@@ -1,103 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Link Cleaner</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link Cleaner</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1><span class="emoji">🧼</span> Link Cleaner</h1>
-  <p>Paste a URL to remove tracking parameters like <code>utm_source</code>, <code>si</code>, or <code>fbclid</code>.</p>
+  <h1><span class="emoji">🧼</span> Link Cleaner</h1>
+  <p>Paste a URL to remove tracking parameters like <code>utm_source</code>, <code>si</code>, or <code>fbclid</code>.</p>
 
-  <input type="text" id="urlInput" placeholder="Paste URL here" />
+  <input type="text" id="urlInput" placeholder="Paste URL here" oninput="checkInput()" />
 
-  <button onclick="cleanLink()">Clean Link</button>
+  <button onclick="cleanLink()">Clean Link</button>
 
-  <textarea id="output" readonly placeholder="Clean link will appear here..."></textarea>
-  <button onclick="copyResult()">Copy to Clipboard</button>
+  <textarea id="output" readonly placeholder="Clean link will appear here..."></textarea>
+  <button id="copyButton" onclick="copyResult()" disabled>Copy to Clipboard</button>
 
-  <p class="error" id="errorBox" style="display: none;"></p>
+  <p class="error" id="errorBox" style="display: none;"></p>
 
-  <div class="note">
-    ✅ Works best with links from:
-    <ul>
-      <li>YouTube (preserves <code>v</code>, <code>t</code>, <code>list</code>)</li>
-      <li>News articles (e.g., CNN, NYTimes, etc.)</li>
-      <li>Online stores (Amazon, etc. to remove affiliate tags)</li>
-    </ul>
-    ❌ Doesn't support shortened URLs like <code>bit.ly</code> unless expanded.<br />
-    <em>All processing is local—nothing is sent anywhere.</em>
-  </div>
+  <div class="note">
+    ✅ Works best with links from:
+    <ul>
+      <li>YouTube (preserves <code>v</code>, <code>t</code>, <code>list</code>)</li>
+      <li>News articles (e.g., CNN, NYTimes, etc.)</li>
+      <li>Online stores (Amazon, etc. to remove affiliate tags)</li>
+    </ul>
+    ❌ Doesn't support shortened URLs like <code>bit.ly</code> unless expanded.<br />
+    <em>All processing is local—nothing is sent anywhere.</em>
+  </div>
 
-  <script>
-    function cleanLink() {
-      const input = document.getElementById("urlInput").value.trim();
-      const outputBox = document.getElementById("output");
-      const errorBox = document.getElementById("errorBox");
-      errorBox.style.display = 'none';
+  <script>
+    function checkInput() {
+      const input = document.getElementById("urlInput").value.trim();
+      document.getElementById("copyButton").disabled = input === "";
+    }
 
-      if (!input.startsWith("http")) {
-        errorBox.textContent = "⚠️ That link is missing http:// or https:// — please paste the full URL.";
-        errorBox.style.color = 'red';
-        errorBox.style.display = 'block';
-        outputBox.value = "";
-        return;
-      }
+    function cleanLink() {
+      const input = document.getElementById("urlInput").value.trim();
+      const outputBox = document.getElementById("output");
+      const errorBox = document.getElementById("errorBox");
+      const copyBtn = document.getElementById("copyButton");
+      errorBox.style.display = 'none';
+      copyBtn.style.display = 'none';
+      outputBox.value = "";
 
-      try {
-        const url = new URL(input);
+      if (!input.startsWith("http")) {
+        errorBox.textContent = "❌ Please enter a full URL starting with http:// or https://.";
+        errorBox.style.color = 'red';
+        errorBox.style.display = 'block';
+        return;
+      }
 
-        const host = url.hostname;
-        let keepParams = [];
+      if (input.includes("redvelv3t.github.io")) {
+        errorBox.textContent = "🥚 Hey! That’s us. Why clean perfection?";
+        errorBox.style.color = 'purple';
+        errorBox.style.display = 'block';
+        return;
+      }
 
-        if (host.includes("youtube.com") || host.includes("youtu.be")) {
-          keepParams = ['v', 't', 'list'];
-        }
+      try {
+        const url = new URL(input);
+        const host = url.hostname;
+        let keepParams = [];
 
-        if (host.includes("bit.ly") || host.includes("tinyurl")) {
-          errorBox.textContent = "⚠️ Shortened URLs like bit.ly must be expanded first.";
-          errorBox.style.color = 'red';
-          errorBox.style.display = 'block';
-          outputBox.value = "";
-          return;
-        }
+        if (host.includes("youtube.com") || host.includes("youtu.be")) {
+          keepParams = ['v', 't', 'list'];
+        }
 
-        const originalUrl = url.toString();
+        if (host.includes("bit.ly") || host.includes("tinyurl")) {
+          errorBox.textContent = "⚠️ Shortened URLs like bit.ly must be expanded first.";
+          errorBox.style.color = 'red';
+          errorBox.style.display = 'block';
+          return;
+        }
 
-        [...url.searchParams.keys()].forEach(param => {
-          if (!keepParams.includes(param)) {
-            url.searchParams.delete(param);
-          }
-        });
+        const originalUrl = url.toString();
 
-        const cleanedUrl = url.toString();
-        outputBox.value = cleanedUrl;
+        [...url.searchParams.keys()].forEach(param => {
+          if (!keepParams.includes(param)) {
+            url.searchParams.delete(param);
+          }
+        });
 
-        if (cleanedUrl === originalUrl) {
-          errorBox.textContent = "✅ This link has no tracking tags. You're good!";
-          errorBox.style.color = 'green';
-        } else {
-          errorBox.textContent = "🧼 Cleaned! Tracking tags removed.";
-          errorBox.style.color = 'blue';
-        }
+        const cleanedUrl = url.toString();
+        outputBox.value = cleanedUrl;
 
-        errorBox.style.display = 'block';
+        if (cleanedUrl === originalUrl) {
+          errorBox.textContent = "✅ This link has no tracking tags. You're good!";
+          errorBox.style.color = 'green';
+        } else {
+          errorBox.textContent = "🧼 Cleaned! Tracking tags removed.";
+          errorBox.style.color = 'blue';
+          copyBtn.style.display = 'inline-block';
+        }
 
-      } catch (err) {
-        outputBox.value = "";
-        errorBox.textContent = "❌ Invalid URL. Please try again.";
-        errorBox.style.color = 'red';
-        errorBox.style.display = 'block';
-      }
-    }
+        errorBox.style.display = 'block';
+      } catch (err) {
+        errorBox.textContent = "❌ Invalid URL. Please try again.";
+        errorBox.style.color = 'red';
+        errorBox.style.display = 'block';
+      }
+    }
 
-    function copyResult() {
-      const output = document.getElementById("output");
-      output.select();
-      document.execCommand("copy");
-      alert("Link copied to clipboard.");
-    }
-  </script>
+    function copyResult() {
+      const output = document.getElementById("output").value.trim();
+      if (output) {
+        navigator.clipboard.writeText(output);
+        alert("Link copied to clipboard.");
+      }
+    }
+
+    window.onload = () => {
+      checkInput();
+    };
+  </script>
 </body>
 </html>
