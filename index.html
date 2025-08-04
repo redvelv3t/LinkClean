@@ -10,12 +10,21 @@
   <h1><span class="emoji">🧼</span> Link Cleaner</h1>
   <p>Paste a URL to remove tracking parameters like <code>utm_source</code>, <code>si</code>, or <code>fbclid</code>.</p>
 
+  <label class="toggle-container">
+    <input type="checkbox" id="darkToggle" onchange="toggleDarkMode()">
+    <span>🌙 Dark Mode</span>
+  </label>
+
   <input type="text" id="urlInput" placeholder="Paste URL here" oninput="checkInput()" />
 
   <button onclick="cleanLink()">Clean Link</button>
 
   <textarea id="output" readonly placeholder="Clean link will appear here..."></textarea>
+
   <button id="copyButton" onclick="copyResult()" disabled>Copy to Clipboard</button>
+  <a id="openLinkButton" href="#" target="_blank" style="display:none;">
+    <button>Open Link</button>
+  </a>
 
   <p class="error" id="errorBox" style="display: none;"></p>
 
@@ -41,8 +50,10 @@
       const outputBox = document.getElementById("output");
       const errorBox = document.getElementById("errorBox");
       const copyBtn = document.getElementById("copyButton");
+      const openLink = document.getElementById("openLinkButton");
       errorBox.style.display = 'none';
       copyBtn.style.display = 'none';
+      openLink.style.display = 'none';
       outputBox.value = "";
 
       if (!input.startsWith("http")) {
@@ -92,10 +103,13 @@
         } else {
           errorBox.textContent = "🧼 Cleaned! Tracking tags removed.";
           errorBox.style.color = 'blue';
-          copyBtn.style.display = 'inline-block';
         }
 
         errorBox.style.display = 'block';
+        copyBtn.style.display = 'inline-block';
+        openLink.href = cleanedUrl;
+        openLink.style.display = 'inline-block';
+
       } catch (err) {
         errorBox.textContent = "❌ Invalid URL. Please try again.";
         errorBox.style.color = 'red';
@@ -109,6 +123,10 @@
         navigator.clipboard.writeText(output);
         alert("Link copied to clipboard.");
       }
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
     }
 
     window.onload = () => {

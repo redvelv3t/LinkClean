@@ -5,6 +5,7 @@ body {
   padding: 20px;
   background: #fdfdfd;
   color: #222;
+  transition: background 0.3s, color 0.3s;
 }
 
 h1 {
@@ -54,6 +55,33 @@ button:hover:enabled {
 .error {
   color: red;
   font-size: 0.9em;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.dark-mode {
+  background: #121212;
+  color: #eee;
+}
+
+.dark-mode input,
+.dark-mode textarea {
+  background: #1e1e1e;
+  color: #eee;
+  border: 1px solid #444;
+}
+
+.dark-mode button {
+  background-color: #444;
+}
+
+.dark-mode .note {
+  color: #ccc;
 }
 
 @media (max-width: 600px) {
