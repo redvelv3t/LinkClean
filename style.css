@@ -16,8 +16,16 @@ h1 {
   margin-bottom: 10px;
 }
 
+.input-group {
+  display: flex;
+  gap: 5px;
+}
+
+#urlInput {
+  flex: 1;
+}
+
 input, textarea, button {
-  width: 100%;
   padding: 10px;
   margin: 10px 0;
   font-size: 1em;
@@ -25,6 +33,7 @@ input, textarea, button {
 }
 
 textarea {
+  width: 100%;
   resize: none;
   height: 80px;
   margin-bottom: 8px;
@@ -37,6 +46,10 @@ button {
   cursor: pointer;
 }
 
+button.primary {
+  font-size: 1.1em;
+}
+
 button:disabled {
   background-color: #888;
   cursor: not-allowed;
@@ -44,6 +57,12 @@ button:disabled {
 
 button:hover:enabled {
   background-color: #111;
+}
+
+#actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .note {
@@ -88,5 +107,9 @@ button:hover:enabled {
   body {
     padding: 15px;
     font-size: 1em;
+  }
+
+  #actionButtons {
+    flex-direction: column;
   }
 }

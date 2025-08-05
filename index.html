@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Link Cleaner</title>
+  <title>Link Cleaner v4</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -15,16 +15,21 @@
     <span>🌙 Dark Mode</span>
   </label>
 
-  <input type="text" id="urlInput" placeholder="Paste URL here" oninput="checkInput()" />
+  <div class="input-group">
+    <input type="text" id="urlInput" placeholder="Paste URL here" oninput="checkInput()" />
+    <button id="clearButton" onclick="clearInput()" disabled>✖</button>
+  </div>
 
   <button onclick="cleanLink()">Clean Link</button>
 
   <textarea id="output" readonly placeholder="Clean link will appear here..."></textarea>
 
-  <button id="copyButton" onclick="copyResult()" disabled>Copy to Clipboard</button>
-  <a id="openLinkButton" href="#" target="_blank" style="display:none;">
-    <button>Open Link</button>
-  </a>
+  <div id="actionButtons">
+    <a id="openLinkButton" href="#" target="_blank" style="display:none;">
+      <button class="primary">Open Link</button>
+    </a>
+    <button id="copyButton" onclick="copyResult()" disabled>Copy to Clipboard</button>
+  </div>
 
   <p class="error" id="errorBox" style="display: none;"></p>
 
@@ -36,13 +41,25 @@
       <li>Online stores (Amazon, etc. to remove affiliate tags)</li>
     </ul>
     ❌ Doesn't support shortened URLs like <code>bit.ly</code> unless expanded.<br />
-    <em>All processing is local—nothing is sent anywhere.</em>
+    🔒 Bank, government, or auth-related links are blocked for safety.<br />
+    <em>All processing is local—nothing is sent anywhere.</em><br />
+    <small style="opacity:0.5;">Version: v4</small>
   </div>
 
   <script>
     function checkInput() {
       const input = document.getElementById("urlInput").value.trim();
       document.getElementById("copyButton").disabled = input === "";
+      document.getElementById("clearButton").disabled = input === "";
+    }
+
+    function clearInput() {
+      document.getElementById("urlInput").value = "";
+      document.getElementById("output").value = "";
+      document.getElementById("errorBox").style.display = "none";
+      document.getElementById("copyButton").disabled = true;
+      document.getElementById("clearButton").disabled = true;
+      document.getElementById("openLinkButton").style.display = "none";
     }
 
     function cleanLink() {
@@ -51,6 +68,7 @@
       const errorBox = document.getElementById("errorBox");
       const copyBtn = document.getElementById("copyButton");
       const openLink = document.getElementById("openLinkButton");
+
       errorBox.style.display = 'none';
       copyBtn.style.display = 'none';
       openLink.style.display = 'none';
@@ -63,9 +81,20 @@
         return;
       }
 
-      if (input.includes("redvelv3t.github.io")) {
-        errorBox.textContent = "🥚 Hey! That’s us. Why clean perfection?";
-        errorBox.style.color = 'purple';
+      if (
+        input.includes("redvelv3t.github.io") ||
+        input.includes("bankofamerica.com") ||
+        input.includes("chase.com") ||
+        input.includes("paypal.com") ||
+        input.includes("irs.gov") ||
+        input.includes("ssa.gov") ||
+        input.includes("appleid.apple.com") ||
+        input.includes("token=") ||
+        input.includes("session") ||
+        input.includes("auth")
+      ) {
+        errorBox.textContent = "⚠️ For your safety, this tool does not support bank or government URLs.";
+        errorBox.style.color = 'orange';
         errorBox.style.display = 'block';
         return;
       }
@@ -130,6 +159,7 @@
     }
 
     window.onload = () => {
+      document.getElementById("urlInput").focus();
       checkInput();
     };
   </script>
